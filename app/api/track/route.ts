@@ -62,6 +62,9 @@ ${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"} Mode
 ⌚ <b>Timestamp:</b> ${new Date(demographics.timestamp).toLocaleString()}`;
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
     const response = await fetch(
       `https://api.telegram.org/bot${botToken}/sendMessage`,
       {
@@ -74,8 +77,11 @@ ${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"} Mode
           text: message,
           parse_mode: "HTML",
         }),
+        signal: controller.signal,
       }
     );
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -84,7 +90,15 @@ ${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"} Mode
       console.log("[Telegram] Message sent successfully!");
     }
   } catch (error) {
-    console.error("[Telegram] Error:", error);
+    if (error instanceof Error) {
+      if (error.name === "AbortError") {
+        console.error("[Telegram] Request timeout after 5 seconds");
+      } else {
+        console.error("[Telegram] Error:", error.message);
+      }
+    } else {
+      console.error("[Telegram] Unknown error:", error);
+    }
   }
 }
 

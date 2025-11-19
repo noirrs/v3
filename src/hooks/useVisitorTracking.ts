@@ -11,22 +11,82 @@ interface LocationData {
 
 async function getLocationData(): Promise<LocationData> {
   try {
-    // Using ip-api.com free tier (no key required)
-    const response = await fetch("https://ip-api.com/json/", {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    });
+    // Try multiple geolocation services in order
 
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        country: data.country || "Unknown",
-        city: data.city || "Unknown",
-        latitude: data.lat || 0,
-        longitude: data.lon || 0,
-      };
+    // First try: ipapi.co (reliable, no key required)
+    try {
+      const response = await fetch("https://ipapi.co/json/", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.country_name && data.city) {
+          return {
+            country: data.country_name || "Unknown",
+            city: data.city || "Unknown",
+            latitude: parseFloat(data.latitude) || 0,
+            longitude: parseFloat(data.longitude) || 0,
+          };
+        }
+      }
+    } catch (e) {
+      console.debug("ipapi.co failed:", e);
+    }
+
+    // Fallback: ip-api.com
+    try {
+      const response = await fetch(
+        "https://ip-api.com/json/?fields=country,city,lat,lon",
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.country && data.city) {
+          return {
+            country: data.country || "Unknown",
+            city: data.city || "Unknown",
+            latitude: data.lat || 0,
+            longitude: data.lon || 0,
+          };
+        }
+      }
+    } catch (e) {
+      console.debug("ip-api.com failed:", e);
+    }
+
+    // Last resort: ipinfo.io (free tier)
+    try {
+      const response = await fetch("https://ipinfo.io/json", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.country && data.city) {
+          const [lat, lon] = (data.loc || "0,0").split(",").map(parseFloat);
+          return {
+            country: data.country || "Unknown",
+            city: data.city || "Unknown",
+            latitude: lat || 0,
+            longitude: lon || 0,
+          };
+        }
+      }
+    } catch (e) {
+      console.debug("ipinfo.io failed:", e);
     }
   } catch (error) {
     console.debug("Location fetch failed:", error);
@@ -114,8 +174,12 @@ async function trackVisitor() {
       isDarkMode,
     };
 
-    // Send to your API
     console.log("[Tracking] Sending demographics data...");
+    console.log(
+      "[Tracking] Location:",
+      demographics.city,
+      demographics.country
+    );
     const response = await fetch("/api/track", {
       method: "POST",
       headers: {

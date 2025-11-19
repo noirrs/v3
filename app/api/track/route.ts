@@ -15,6 +15,7 @@ interface DemographicsData {
   deviceName: string;
   referrer: string;
   isDarkMode: boolean;
+  visitedDomain: string;
 }
 
 async function sendToTelegram(demographics: DemographicsData) {
@@ -43,8 +44,15 @@ async function sendToTelegram(demographics: DemographicsData) {
       : "🖥️";
 
   const themeEmoji = demographics.isDarkMode ? "🌙" : "☀️";
+  const environmentEmoji =
+    demographics.visitedDomain === "localhost" ? "🧪" : "🚀";
 
   const message = `${deviceEmoji} <b>New Visitor</b>
+
+${environmentEmoji} <b>Environment:</b> ${
+    demographics.visitedDomain === "localhost" ? "Development" : "Production"
+  }
+📍 <b>Domain:</b> ${demographics.visitedDomain}
 
 📍 <b>Location:</b> ${demographics.city}, ${demographics.country}
    Coordinates: ${demographics.latitude.toFixed(

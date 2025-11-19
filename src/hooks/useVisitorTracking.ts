@@ -172,6 +172,7 @@ async function trackVisitor() {
       deviceName: detectDeviceName(),
       referrer: document.referrer || "Direct",
       isDarkMode,
+      visitedDomain: window.location.hostname,
     };
 
     console.log("[Tracking] Sending demographics data...");

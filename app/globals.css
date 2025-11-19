@@ -1,26 +1,240 @@
 @import "tailwindcss";
 
 :root {
+  --background: black;
+  --foreground: white;
+  color-scheme: dark;
+}
+
+html.light {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
+  color-scheme: light;
+}
+
+html.dark {
+  --background: black;
+  --foreground: white;
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-sora, system-ui);
+  --font-mono: var(--font-jetbrains-mono, monospace);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sora), system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light theme overrides */
+html.light {
+  --tw-bg-opacity: 1;
+  --tw-text-opacity: 1;
+}
+
+/* Background colors */
+html.light .bg-white\/2 {
+  background-color: rgba(15, 23, 42, 0.02) !important;
+}
+
+html.light .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+html.light .bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+html.light .bg-white\/20 {
+  background-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+html.light .bg-black {
+  background-color: #ffffff !important;
+}
+
+/* Text colors */
+html.light .text-white {
+  color: #0f172a !important;
+}
+
+html.light .text-zinc-300 {
+  color: #334155 !important;
+}
+
+html.light .text-zinc-400 {
+  color: #64748b !important;
+}
+
+html.light .text-zinc-500 {
+  color: #78828f !important;
+}
+
+html.light .text-zinc-600 {
+  color: #94a3b8 !important;
+}
+
+/* Border colors */
+html.light .border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+html.light .border-white\/20 {
+  border-color: rgba(15, 23, 42, 0.15) !important;
+}
+
+html.light .border-white\/40 {
+  border-color: rgba(15, 23, 42, 0.25) !important;
+}
+
+/* Hover states */
+html.light .hover\:bg-white\/10:hover {
+  background-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+html.light .hover\:bg-white\/20:hover {
+  background-color: rgba(15, 23, 42, 0.15) !important;
+}
+
+html.light .hover\:border-white\/20:hover {
+  border-color: rgba(15, 23, 42, 0.2) !important;
+}
+
+html.light .hover\:text-white:hover {
+  color: #0f172a !important;
+}
+
+html.light .hover\:text-zinc-300:hover {
+  color: #1e293b !important;
+}
+
+/* Navigation and interactive elements */
+html.light .hover\:bg-white\/5:hover {
+  background-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+html.light .hover\:border-white\/10:hover {
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+/* Placeholder and muted text */
+html.light .placeholder-zinc-400::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Shadow and backdrop effects */
+html.light .backdrop-blur-md {
+  backdrop-filter: blur(12px) !important;
+  background-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+html.light .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Scrollbar styling for light theme */
+html.light ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  border-radius: 4px;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #b0b0b0;
+}
+
+/* Additional universal selectors for light theme */
+html.light {
+  background-color: white !important;
+  color: #1a1a1a !important;
+}
+
+html.light * {
+  color: inherit;
+}
+
+/* Line-clamp and text-truncate */
+html.light .line-clamp-1,
+html.light .line-clamp-2,
+html.light .line-clamp-3 {
+  color: #666666 !important;
+}
+
+/* Specific element overrides */
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light h5,
+html.light h6,
+html.light p,
+html.light span,
+html.light div {
+  color: inherit;
+}
+
+/* Button and interactive elements */
+html.light button {
+  color: inherit;
+}
+
+html.light a {
+  color: #1a1a1a;
+}
+
+/* Opacity-based text adjustments */
+html.light .opacity-80 {
+  opacity: 0.8;
+  color: #475569 !important;
+}
+
+html.light .opacity-75 {
+  opacity: 0.75;
+  color: #64748b !important;
+}
+
+/* SVG colors */
+html.light svg {
+  color: inherit;
+  stroke: inherit;
+}
+
+/* SVG stroke and fill for icons */
+html.light svg line,
+html.light svg path,
+html.light svg polyline,
+html.light svg circle {
+  stroke: #0f172a !important;
+}
+
+html.light svg path[fill] {
+  fill: #0f172a !important;
+}
+
+/* Form elements */
+html.light input,
+html.light textarea,
+html.light select {
+  background-color: rgba(15, 23, 42, 0.03) !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
 }

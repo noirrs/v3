@@ -23,6 +23,7 @@ interface DemographicsData {
   referrer: string;
   isDarkMode: boolean;
   visitedDomain: string;
+  visitedUrl: string;
 }
 
 async function sendToTelegram(demographics: DemographicsData) {
@@ -74,6 +75,7 @@ ${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"} Mode
 ⏰ <b>Timezone:</b> ${demographics.timezone}
 
 🔗 <b>Referrer:</b> ${demographics.referrer || "Direct"}
+🌍 <b>Visited URL:</b> ${demographics.visitedUrl}
 ⌚ <b>Timestamp:</b> ${new Date(demographics.timestamp).toLocaleString()}`;
 
   try {

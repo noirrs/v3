@@ -173,6 +173,7 @@ async function trackVisitor() {
       referrer: document.referrer || "Direct",
       isDarkMode,
       visitedDomain: window.location.hostname,
+      visitedUrl: window.location.href,
     };
 
     console.log("[Tracking] Sending demographics data...");

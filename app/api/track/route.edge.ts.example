@@ -1,11 +1,11 @@
+// ALTERNATIVE APPROACH: Edge Runtime with waitUntil
+// Rename this file to route.ts if you want to use this approach
+// Pros: Instant response (no latency), true fire-and-forget
+// Cons: Edge runtime limitations, experimental waitUntil API
+
 import { NextRequest, NextResponse } from "next/server";
 
-// Force Node.js runtime for reliable outbound HTTP calls
-// Edge runtime has stricter timeouts and different fetch behavior
-export const runtime = "nodejs";
-
-// Increase max duration for Vercel serverless function (default is 10s on hobby, 60s on pro)
-export const maxDuration = 10;
+export const runtime = "edge";
 
 interface DemographicsData {
   timestamp: string;
@@ -29,17 +29,8 @@ async function sendToTelegram(demographics: DemographicsData) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
-  console.log("[Telegram] Attempting to send message...");
-  console.log("[Telegram] Token exists:", !!botToken);
-  console.log("[Telegram] Chat ID exists:", !!chatId);
-
   if (!botToken || !chatId) {
-    console.error(
-      "[Telegram] Missing credentials - Token:",
-      !!botToken,
-      "Chat ID:",
-      !!chatId
-    );
+    console.error("[Telegram] Missing credentials");
     return;
   }
 
@@ -77,8 +68,6 @@ ${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"} Mode
 ⌚ <b>Timestamp:</b> ${new Date(demographics.timestamp).toLocaleString()}`;
 
   try {
-    // Removed AbortController - let Vercel's maxDuration handle timeouts
-    // Cold starts can take 3-5s, so 5s timeout was too aggressive
     const response = await fetch(
       `https://api.telegram.org/bot${botToken}/sendMessage`,
       {
@@ -97,18 +86,11 @@ ${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"} Mode
     if (!response.ok) {
       const errorText = await response.text();
       console.error("[Telegram] Send failed:", response.status, errorText);
-      throw new Error(`Telegram API error: ${response.status}`);
     } else {
       console.log("[Telegram] Message sent successfully!");
     }
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("[Telegram] Error:", error.message);
-    } else {
-      console.error("[Telegram] Unknown error:", error);
-    }
-    // Re-throw to let the caller handle it
-    throw error;
+    console.error("[Telegram] Error:", error);
   }
 }
 
@@ -116,7 +98,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as DemographicsData;
 
-    // Validate required fields
     if (!body.timestamp || !body.userAgent) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -124,19 +105,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // CRITICAL: Must await to ensure Telegram message is sent before function terminates
-    // Vercel serverless functions kill the execution context when response is sent
-    // This adds ~200-500ms latency but guarantees delivery
-    await sendToTelegram(body);
-
-    return NextResponse.json(
+    const response = NextResponse.json(
       { success: true, message: "Demographics tracked" },
       { status: 200 }
     );
+
+    // waitUntil allows background tasks to continue after response is sent
+    // This is Edge runtime specific and may not be fully stable
+    // @ts-expect-error - waitUntil might not be in types yet
+    if (response.waitUntil) {
+      // @ts-expect-error
+      response.waitUntil(sendToTelegram(body));
+    } else {
+      // Fallback: await if waitUntil is not available
+      console.warn("[Telegram] waitUntil not available, awaiting instead");
+      await sendToTelegram(body);
+    }
+
+    return response;
   } catch (error) {
     console.error("API error:", error);
-    // Even if Telegram fails, we return success to not block the client
-    // Consider logging to external service for critical tracking
     return NextResponse.json(
       { success: true, message: "Request acknowledged" },
       { status: 200 }

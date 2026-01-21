@@ -20,10 +20,17 @@ interface DemographicsData {
   screenHeight: number;
   deviceType: string;
   deviceName: string;
+  browserName: string;
+  browserVersion: string;
+  os: string;
+  connectionType: string;
   referrer: string;
   isDarkMode: boolean;
   visitedDomain: string;
   visitedUrl: string;
+  visitorId: string;
+  eventType?: "page_load" | "section_view";
+  sectionName?: string;
 }
 
 async function sendToTelegram(demographics: DemographicsData) {
@@ -39,7 +46,7 @@ async function sendToTelegram(demographics: DemographicsData) {
       "[Telegram] Missing credentials - Token:",
       !!botToken,
       "Chat ID:",
-      !!chatId
+      !!chatId,
     );
     return;
   }
@@ -48,35 +55,65 @@ async function sendToTelegram(demographics: DemographicsData) {
     demographics.deviceType === "mobile"
       ? "📱"
       : demographics.deviceType === "tablet"
-      ? "📊"
-      : "🖥️";
+        ? "📊"
+        : "🖥️";
 
   const themeEmoji = demographics.isDarkMode ? "🌙" : "☀️";
   const environmentEmoji =
     demographics.visitedDomain === "localhost" ? "🧪" : "🚀";
 
-  const message = `${deviceEmoji} <b>New Visitor</b>
+  // Section emoji mapping
+  const sectionEmojis: Record<string, string> = {
+    education: "🎓",
+    experience: "💼",
+    projects: "🚀",
+    resume: "📄",
+  };
+
+  let message = "";
+
+  if (demographics.eventType === "section_view" && demographics.sectionName) {
+    const sectionEmoji = sectionEmojis[demographics.sectionName] || "📍";
+    const sectionTitle =
+      demographics.sectionName.charAt(0).toUpperCase() +
+      demographics.sectionName.slice(1);
+
+    message = `${sectionEmoji} <b>Section Navigation</b>
+
+🆔 <b>Visitor:</b> <code>${demographics.visitorId}</code>
+📌 <b>Section:</b> ${sectionTitle}
+${deviceEmoji} <b>Device:</b> ${demographics.deviceName}🌐 <b>Browser:</b> ${demographics.browserName} ${demographics.browserVersion}
+💻 <b>OS:</b> ${demographics.os}${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"}
+⌚ <b>Time:</b> ${new Date(demographics.timestamp).toLocaleString()}`;
+  } else {
+    message = `${deviceEmoji} <b>New Visitor</b>
+
+🆔 <b>Visitor ID:</b> <code>${demographics.visitorId}</code>
 
 ${environmentEmoji} <b>Environment:</b> ${
-    demographics.visitedDomain === "localhost" ? "Development" : "Production"
-  }
+      demographics.visitedDomain === "localhost" ? "Development" : "Production"
+    }
 📍 <b>Domain:</b> ${demographics.visitedDomain}
 
 📍 <b>Location:</b> ${demographics.city}, ${demographics.country}
    Coordinates: ${demographics.latitude.toFixed(
-     2
+     2,
    )}°, ${demographics.longitude.toFixed(2)}°
 
 📱 <b>Device:</b> ${demographics.deviceName}
+� <b>OS:</b> ${demographics.os}
+🌐 <b>Browser:</b> ${demographics.browserName} ${demographics.browserVersion}
+📶 <b>Connection:</b> ${demographics.connectionType}
 📏 <b>Screen Size:</b> ${demographics.screenWidth}x${demographics.screenHeight}
 
 ${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"} Mode
-🌐 <b>Language:</b> ${demographics.language}
+🗣 <b>Language:</b> ${demographics.language}
 ⏰ <b>Timezone:</b> ${demographics.timezone}
 
 🔗 <b>Referrer:</b> ${demographics.referrer || "Direct"}
 🌍 <b>Visited URL:</b> ${demographics.visitedUrl}
 ⌚ <b>Timestamp:</b> ${new Date(demographics.timestamp).toLocaleString()}`;
+  }
 
   try {
     // Removed AbortController - let Vercel's maxDuration handle timeouts
@@ -93,7 +130,7 @@ ${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"} Mode
           text: message,
           parse_mode: "HTML",
         }),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -122,7 +159,7 @@ export async function POST(request: NextRequest) {
     if (!body.timestamp || !body.userAgent) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -133,7 +170,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, message: "Demographics tracked" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("API error:", error);
@@ -141,7 +178,7 @@ export async function POST(request: NextRequest) {
     // Consider logging to external service for critical tracking
     return NextResponse.json(
       { success: true, message: "Request acknowledged" },
-      { status: 200 }
+      { status: 200 },
     );
   }
 }

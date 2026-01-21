@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { config } from "@/lib/config";
+import { trackSectionView } from "@/hooks/useVisitorTracking";
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState("skills");
@@ -11,6 +12,9 @@ export default function Home() {
   const [expandedWork, setExpandedWork] = useState(null);
 
   useEffect(() => {
+    // Track section view (skips "skills" automatically)
+    trackSectionView(activeSection);
+
     // Fetch data when projects or experience section is accessed
     if (
       (activeSection === "projects" || activeSection === "experience") &&
@@ -26,7 +30,7 @@ export default function Home() {
       // Reset activeSection to prevent repeated redirects
       setActiveSection("skills");
     }
-  }, [activeSection]);
+  }, [activeSection, projects.length, works.length]);
 
   const fetchData = async () => {
     setLoading(true);

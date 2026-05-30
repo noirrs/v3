@@ -106,12 +106,11 @@ export default function Home() {
             >
               Taha Kaçmaz
             </p>
-            <p
-              className="text-base sm:text-lg font-semibold mb-4 drop-shadow-lg"
-              style={{ color: "var(--foreground)" }}
-            >
-              Backend Developer
-            </p>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-4 text-base sm:text-lg font-semibold drop-shadow-lg" style={{ color: "var(--foreground)" }}>
+              <span>Backend Developer</span>
+              <span className="text-zinc-500">•</span>
+              <span className="text-zinc-400">Computer Engineering at University of Toronto</span>
+            </div>
             <p
               className="text-sm sm:text-base leading-relaxed mb-6 md:mb-8"
               style={{ color: "var(--foreground)", opacity: 0.8 }}
@@ -230,6 +229,26 @@ export default function Home() {
                 Education
               </h2>
               <div className="space-y-6">
+                {/* University Education */}
+                <div className="border-l-2 border-white/20 pl-4 sm:pl-6 py-2">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2 sm:gap-0">
+                    <div>
+                      <h3 className="text-base sm:text-lg font-semibold text-white">
+                        University of Toronto
+                      </h3>
+                      <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+                        Bachelor of Applied Science (BASc) in Computer Engineering
+                      </p>
+                      <p className="text-xs sm:text-sm text-zinc-400">
+                        Faculty of Applied Science & Engineering
+                      </p>
+                    </div>
+                    <span className="text-xs sm:text-sm text-zinc-500 font-medium whitespace-nowrap">
+                      2026 - 2030
+                    </span>
+                  </div>
+                </div>
+
                 {/* Primary Education */}
                 <div className="border-l-2 border-white/20 pl-4 sm:pl-6 py-2">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2 sm:gap-0">
@@ -259,73 +278,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* AP Section */}
-                <div className="border-l-2 border-white/20 pl-4 sm:pl-6 py-2">
-                  <div className="mb-4">
-                    <h3 className="text-base sm:text-lg font-semibold text-white mb-4">
-                      Advanced Placement (AP)
-                    </h3>
-                    <p className="text-xs sm:text-sm text-zinc-400 mb-3">
-                      Self-study student
-                    </p>
-
-                    {/* AP Scores */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center text-xs sm:text-sm">
-                        <span className="text-zinc-300">AP Calculus BC</span>
-                        <span className="font-semibold bg-white/5 px-3 py-1 rounded-full text-zinc-300 border border-white/10">
-                          5
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs sm:text-sm">
-                        <span className="text-zinc-300">
-                          AP Computer Science
-                        </span>
-                        <span className="font-semibold bg-white/5 px-3 py-1 rounded-full text-zinc-300 border border-white/10">
-                          4
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs sm:text-sm">
-                        <span className="text-zinc-300">
-                          AP Comparative Government & Politics
-                        </span>
-                        <span className="font-semibold bg-white/5 px-3 py-1 rounded-full text-zinc-300 border border-white/10">
-                          4
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs sm:text-sm">
-                        <span className="text-zinc-300">
-                          AP French Language & Culture
-                        </span>
-                        <span className="font-semibold bg-white/5 px-3 py-1 rounded-full text-zinc-300 border border-white/10">
-                          4
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* SAT Score */}
-                  <div className="mt-6 pt-4 border-t border-white/10">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 gap-2 sm:gap-0">
-                      <span className="text-base sm:text-lg font-semibold text-white">
-                        SAT
-                      </span>
-                      <span className="text-2xl font-bold text-white">
-                        1440
-                      </span>
-                    </div>
-                    <div className="space-y-1 text-xs sm:text-sm">
-                      <div className="flex justify-between text-zinc-400">
-                        <span>Reading & Writing</span>
-                        <span className="text-zinc-300">700</span>
-                      </div>
-                      <div className="flex justify-between text-zinc-400">
-                        <span>Math</span>
-                        <span className="text-zinc-300">740</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           )}

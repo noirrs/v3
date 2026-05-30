@@ -8,6 +8,8 @@ export const config = {
     github: GITHUB_USERNAME,
     linkedin: "tahakacmaz",
     email: "hi@noir.land",
+    instagram: "tahakacmaz7",
+    snapchat: "tahakacmaz7",
   },
   data: {
     dataUrl: `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_USERNAME}/master/data.json`,

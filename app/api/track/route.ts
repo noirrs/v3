@@ -33,6 +33,15 @@ interface DemographicsData {
   sectionName?: string;
 }
 
+function escapeHtml(unsafe: string): string {
+  if (!unsafe) return "";
+  return unsafe
+    .toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 async function sendToTelegram(demographics: DemographicsData) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -80,44 +89,42 @@ async function sendToTelegram(demographics: DemographicsData) {
 
     message = `${sectionEmoji} <b>Section Navigation</b>
 
-🆔 <b>Visitor:</b> <code>${demographics.visitorId}</code>
-📌 <b>Section:</b> ${sectionTitle}
-${deviceEmoji} <b>Device:</b> ${demographics.deviceName}🌐 <b>Browser:</b> ${demographics.browserName} ${demographics.browserVersion}
-💻 <b>OS:</b> ${demographics.os}${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"}
+🆔 <b>Visitor:</b> <code>${escapeHtml(demographics.visitorId)}</code>
+📌 <b>Section:</b> ${escapeHtml(sectionTitle)}
+${deviceEmoji} <b>Device:</b> ${escapeHtml(demographics.deviceName)}
+🌐 <b>Browser:</b> ${escapeHtml(demographics.browserName)} ${escapeHtml(demographics.browserVersion)}
+💻 <b>OS:</b> ${escapeHtml(demographics.os)}
+${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"}
 ⌚ <b>Time:</b> ${new Date(demographics.timestamp).toLocaleString()}`;
   } else {
     message = `${deviceEmoji} <b>New Visitor</b>
 
-🆔 <b>Visitor ID:</b> <code>${demographics.visitorId}</code>
+🆔 <b>Visitor ID:</b> <code>${escapeHtml(demographics.visitorId)}</code>
 
 ${environmentEmoji} <b>Environment:</b> ${
       demographics.visitedDomain === "localhost" ? "Development" : "Production"
     }
-📍 <b>Domain:</b> ${demographics.visitedDomain}
+📍 <b>Domain:</b> ${escapeHtml(demographics.visitedDomain)}
 
-📍 <b>Location:</b> ${demographics.city}, ${demographics.country}
-   Coordinates: ${demographics.latitude.toFixed(
-     2,
-   )}°, ${demographics.longitude.toFixed(2)}°
+📍 <b>Location:</b> ${escapeHtml(demographics.city)}, ${escapeHtml(demographics.country)}
+   Coordinates: ${demographics.latitude ? demographics.latitude.toFixed(2) : 0}°, ${demographics.longitude ? demographics.longitude.toFixed(2) : 0}°
 
-📱 <b>Device:</b> ${demographics.deviceName}
-� <b>OS:</b> ${demographics.os}
-🌐 <b>Browser:</b> ${demographics.browserName} ${demographics.browserVersion}
-📶 <b>Connection:</b> ${demographics.connectionType}
+📱 <b>Device:</b> ${escapeHtml(demographics.deviceName)}
+💻 <b>OS:</b> ${escapeHtml(demographics.os)}
+🌐 <b>Browser:</b> ${escapeHtml(demographics.browserName)} ${escapeHtml(demographics.browserVersion)}
+📶 <b>Connection:</b> ${escapeHtml(demographics.connectionType)}
 📏 <b>Screen Size:</b> ${demographics.screenWidth}x${demographics.screenHeight}
 
 ${themeEmoji} <b>Theme:</b> ${demographics.isDarkMode ? "Dark" : "Light"} Mode
-🗣 <b>Language:</b> ${demographics.language}
-⏰ <b>Timezone:</b> ${demographics.timezone}
+🗣 <b>Language:</b> ${escapeHtml(demographics.language)}
+⏰ <b>Timezone:</b> ${escapeHtml(demographics.timezone)}
 
-🔗 <b>Referrer:</b> ${demographics.referrer || "Direct"}
-🌍 <b>Visited URL:</b> ${demographics.visitedUrl}
+🔗 <b>Referrer:</b> ${escapeHtml(demographics.referrer || "Direct")}
+🌍 <b>Visited URL:</b> ${escapeHtml(demographics.visitedUrl)}
 ⌚ <b>Timestamp:</b> ${new Date(demographics.timestamp).toLocaleString()}`;
   }
 
   try {
-    // Removed AbortController - let Vercel's maxDuration handle timeouts
-    // Cold starts can take 3-5s, so 5s timeout was too aggressive
     const response = await fetch(
       `https://api.telegram.org/bot${botToken}/sendMessage`,
       {
@@ -164,8 +171,6 @@ export async function POST(request: NextRequest) {
     }
 
     // CRITICAL: Must await to ensure Telegram message is sent before function terminates
-    // Vercel serverless functions kill the execution context when response is sent
-    // This adds ~200-500ms latency but guarantees delivery
     await sendToTelegram(body);
 
     return NextResponse.json(
@@ -175,7 +180,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("API error:", error);
     // Even if Telegram fails, we return success to not block the client
-    // Consider logging to external service for critical tracking
     return NextResponse.json(
       { success: true, message: "Request acknowledged" },
       { status: 200 },

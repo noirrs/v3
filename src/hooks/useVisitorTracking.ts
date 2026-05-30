@@ -114,7 +114,7 @@ function detectDeviceType(): string {
   return "desktop";
 }
 
-function detectDeviceName(): string {
+export function detectDeviceName(): string {
   if (typeof window === "undefined") return "Unknown Device";
 
   const ua = navigator.userAgent;
@@ -153,7 +153,7 @@ function detectDeviceName(): string {
   return "Unknown Device";
 }
 
-function detectBrowser(): { name: string; version: string } {
+export function detectBrowser(): { name: string; version: string } {
   if (typeof window === "undefined")
     return { name: "Unknown", version: "Unknown" };
 
@@ -195,7 +195,7 @@ function detectBrowser(): { name: string; version: string } {
   return { name: browserName, version: browserVersion };
 }
 
-function detectOS(): string {
+export function detectOS(): string {
   if (typeof window === "undefined") return "Unknown";
 
   const ua = navigator.userAgent;
@@ -301,37 +301,41 @@ interface TrackingData {
   sectionName?: string;
 }
 
+export async function getDemographicsData(): Promise<TrackingData> {
+  const isDarkMode = document.documentElement.classList.contains("dark");
+  const locationData = await getLocationData();
+  const visitorId = getVisitorId();
+  const browser = detectBrowser();
+
+  return {
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    language: navigator.language || "Unknown",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    country: locationData.country,
+    city: locationData.city,
+    latitude: locationData.latitude,
+    longitude: locationData.longitude,
+    screenWidth: window.innerWidth,
+    screenHeight: window.innerHeight,
+    deviceType: detectDeviceType(),
+    deviceName: detectDeviceName(),
+    browserName: browser.name,
+    browserVersion: browser.version,
+    os: detectOS(),
+    connectionType: detectConnectionType(),
+    referrer: document.referrer || "Direct",
+    isDarkMode,
+    visitedDomain: window.location.hostname,
+    visitedUrl: window.location.href,
+    visitorId,
+  };
+}
+
 async function trackVisitor() {
   try {
-    const isDarkMode = document.documentElement.classList.contains("dark");
-    const locationData = await getLocationData();
-    const visitorId = getVisitorId();
-    const browser = detectBrowser();
-
-    const demographics: TrackingData = {
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      language: navigator.language || "Unknown",
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      country: locationData.country,
-      city: locationData.city,
-      latitude: locationData.latitude,
-      longitude: locationData.longitude,
-      screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight,
-      deviceType: detectDeviceType(),
-      deviceName: detectDeviceName(),
-      browserName: browser.name,
-      browserVersion: browser.version,
-      os: detectOS(),
-      connectionType: detectConnectionType(),
-      referrer: document.referrer || "Direct",
-      isDarkMode,
-      visitedDomain: window.location.hostname,
-      visitedUrl: window.location.href,
-      visitorId,
-      eventType: "page_load",
-    };
+    const demographics = await getDemographicsData();
+    demographics.eventType = "page_load";
 
     console.log("[Tracking] Sending demographics data...");
     console.log(
@@ -339,7 +343,7 @@ async function trackVisitor() {
       demographics.city,
       demographics.country,
     );
-    console.log("[Tracking] Visitor ID:", visitorId);
+    console.log("[Tracking] Visitor ID:", demographics.visitorId);
     const response = await fetch("/api/track", {
       method: "POST",
       headers: {

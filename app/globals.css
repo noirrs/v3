@@ -217,6 +217,8 @@ html.light svg {
 html.light svg line,
 html.light svg path,
 html.light svg polyline,
+html.light svg rect,
+html.light svg polygon,
 html.light svg circle {
   stroke: #0f172a !important;
 }

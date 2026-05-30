@@ -153,7 +153,7 @@ export default function SocialPage() {
 
   return (
     <div
-      className="min-h-screen transition-colors duration-300 flex flex-col justify-between py-12 px-4 sm:px-6"
+      className="min-h-screen transition-colors duration-300 flex flex-col justify-between py-12 px-4 sm:px-6 overflow-x-hidden w-full max-w-full"
       style={{
         backgroundColor: "var(--background)",
         color: "var(--foreground)",
@@ -252,7 +252,7 @@ export default function SocialPage() {
               {note.trim() ? (
                 <div 
                   ref={trackRef}
-                  className="relative w-full h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center backdrop-blur-sm overflow-hidden select-none"
+                  className="relative w-full h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center backdrop-blur-sm overflow-hidden select-none touch-none"
                 >
                   {/* Sliding Hint Text */}
                   <span 
@@ -273,7 +273,7 @@ export default function SocialPage() {
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
-                    className="absolute left-1 w-10 h-10 bg-white text-zinc-900 rounded-full flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing select-none"
+                    className="absolute left-1 w-10 h-10 bg-white text-zinc-900 rounded-full flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing select-none touch-none"
                     style={{ 
                       transform: `translateX(${sliderPos}px)`,
                       transition: isDragging ? 'none' : 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
